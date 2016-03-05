@@ -1,6 +1,6 @@
 <?php
 
-namespace rave\lib\core\security;
+namespace rave\lib\core\io;
 
 use rave\core\exception\IOException;
 use rave\core\exception\UploadException;
