@@ -12,7 +12,7 @@ abstract class Controller
 
     protected $data = [];
 
-    protected $layout = false;
+    protected $layout = null;
 
     private static $currentLogFile;
 
@@ -24,7 +24,7 @@ abstract class Controller
 
         $controller = explode('\\', static::class);
 
-        $file = ROOT . '/app/view/' . strtolower(end($controller)) . '/' . $view . '.php';
+        $file = SRC . '/app/view/' . strtolower(end($controller)) . '/' . $view . '.php';
 
         ob_start();
 
@@ -39,8 +39,14 @@ abstract class Controller
         if (!$this->layout) {
             echo $content;
         } else {
-            include_once ROOT . '/app/view/layout/' . $this->layout . '.php';
+            include_once SRC . '/app/view/layout/' . $this->layout . '.php';
         }
+    }
+
+    protected function setLayout($layout, array $data = [])
+    {
+        $this->data = array_merge($this->data, $data);
+        $this->layout = file_exists(SRC . '/app/view/layout/' . $layout . '.php') ? $layout : null;
     }
 
     protected function redirect(string $page = '')
@@ -55,14 +61,19 @@ abstract class Controller
 
         switch ($priority) {
             case self::LOG_NOTICE:
-                $log .= ' : ' . $message;
+                $log .= ' : ';
                 break;
             case self::LOG_WARNING:
-                $log .= ' WARNING : ' . $message;
+                $log .= ' WARNING : ';
                 break;
             case self::LOG_FATAL_ERROR:
-                $log .= ' FATAL ERROR : ' . $message;
+                $log .= ' FATAL ERROR : ';
+                break;
+            default:
+                $log .= ' : ';
         }
+
+        $log .= $message;
 
         try {
             $this->writeLog($log);
@@ -88,12 +99,6 @@ abstract class Controller
 
             $this->writeLog($message);
         }
-    }
-
-    protected function setLayout($layout, array $data = [])
-    {
-        $this->data = $data;
-        $this->layout = file_exists(ROOT . '/app/view/layout/' . $layout . '.php') ? $layout : false;
     }
 
 }

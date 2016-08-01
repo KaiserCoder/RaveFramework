@@ -2,8 +2,6 @@
 
 namespace rave\core;
 
-use rave\config\Config;
-
 use rave\core\database\DriverFactory;
 use rave\core\database\driver\GenericDriver;
 use rave\core\exception\UnknownDriverException;
@@ -20,7 +18,7 @@ abstract class Model
 	{
 		if (!isset(self::$driver)) {
             try {
-                self::$driver = DriverFactory::get(Config::getDatabase('driver'));
+                self::$driver = DriverFactory::get(Config::get('database')['driver']);
             } catch (UnknownDriverException $exception) {
                 Error::create($exception->getMessage(), 500);
             }

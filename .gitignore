@@ -136,3 +136,6 @@ nb-configuration.xml
 
 .idea
 .gitignore
+composer.lock
+config/app.php
+vendor

@@ -1,6 +1,6 @@
 <?php
 
-use rave\config\Config;
+use rave\core\Config;
 
 use rave\core\Error;
 use rave\core\router\Router;

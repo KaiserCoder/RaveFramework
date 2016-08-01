@@ -1,63 +1,64 @@
 <?php
 
-namespace rave\core\database\driver\SQLiteDriverPDO;
+namespace rave\core\database\driver\MySQLDriverPDO;
 
 use PDO, PDOException;
 
 use rave\core\Error;
-use rave\config\Config;
-
+use rave\core\Config;
 use rave\core\database\driver\GenericDriver;
 
-class SQLiteDriverPDO implements GenericDriver
+class MySQLDriverPDO implements GenericDriver
 {
     private static $instance;
 
     private static function getInstance()
     {
+        $config = Config::get('database');
+
         if (!isset(self::$instance)) {
             try {
-		        self::$instance = new PDO('sqlite:' . Config::getDatabase('path'));
-		        self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                self::$instance = new PDO('mysql:dbname=' . $config['database'] . ';host=' . $config['host'], $config['login'], $config['password'], [PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8']);
+                self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             } catch (PDOException $pdoException) {
                 Error::create($pdoException->getMessage(), 500);
             }
         }
 
-	    return self::$instance;
+        return self::$instance;
     }
-
+    
     private function queryDatabase(string $statement, array $values, bool $unique)
     {
-        try {
+    	try {
             $sql = self::getInstance()->prepare($statement);
             $sql->execute($values);
 
             if ($unique === true) {
                 $result = $sql->fetch(PDO::FETCH_OBJ);
-                return $result === false ? null : $result;
+            	return $result === false ? null : $result;
             }
             $result = $sql->fetchAll(PDO::FETCH_OBJ);
             return $result === false ? null : $result;
-        } catch (PDOException $pdoException) {
+    	} catch (PDOException $pdoException) {
             Error::create($pdoException->getMessage(), 500);
-        }
+    	}
     }
-
+    
     public function query(string $statement, array $values = []): array
     {
-	    return $this->queryDatabase($statement, $values, false);
+        return $this->queryDatabase($statement, $values, false);
     }
-
+    
     public function queryOne(string $statement, array $values = [])
     {
-	    return $this->queryDatabase($statement, $values, true);
+        return $this->queryDatabase($statement, $values, true);
     }
 
     public function execute(string $statement, array $values = [])
     {
         try {
-            $sql = self::getInstance()->prepare($statement);
+            $sql = $this->getInstance()->prepare($statement);
             $sql->execute($values);
         } catch (PDOException $pdoException) {
             Error::create($pdoException->getMessage(), 500);

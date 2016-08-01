@@ -2,8 +2,6 @@
 
 namespace rave\core;
 
-use rave\config\Config;
-
 use rave\core\exception\UnknownErrorException;
 
 class Error
@@ -11,7 +9,7 @@ class Error
 
     public static function create(string $errorMessage, int $errorCode = 404)
     {
-        if (Config::isDebug()) {
+        if (Config::get('debug')) {
             die($errorMessage);
         } else {
             self::show($errorCode);
